@@ -2,6 +2,10 @@
   "version": 2,
   "builds": [
     {
+      "src": "api/test-db.js",
+      "use": "@vercel/node"
+    },
+    {
       "src": "api/index.js",
       "use": "@vercel/node"
     },
@@ -12,6 +16,10 @@
     }
   ],
   "routes": [
+    {
+      "src": "/api/test-db",
+      "dest": "api/test-db.js"
+    },
     {
       "src": "/api/(.*)",
       "dest": "api/index.js"
