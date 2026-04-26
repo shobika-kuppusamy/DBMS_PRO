@@ -9,7 +9,7 @@ const pool = new Pool({
 });
 
 pool.on('connect', () => {
-    console.log('✅ Successfully connected to Neon PostgreSQL');
+    console.log('✅ Successfully connected to Supabase PostgreSQL');
 });
 
 // Test the connection immediately
