@@ -10,7 +10,7 @@
       "use": "@vercel/node"
     },
     {
-      "src": "DBMS project/package.json",
+      "src": "frontend/package.json",
       "use": "@vercel/static-build",
       "config": { "distDir": "dist" }
     }
@@ -26,7 +26,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/DBMS project/$1",
+      "dest": "/frontend/$1",
       "continue": true
     },
     {
@@ -34,7 +34,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/DBMS project/index.html"
+      "dest": "/frontend/index.html"
     }
   ]
 }

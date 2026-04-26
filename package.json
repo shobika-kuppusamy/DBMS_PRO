@@ -1,12 +1,12 @@
 {
-  "name": "aura-luxe-fullstack",
+  "name": "aura-luxe-professional",
   "version": "1.0.0",
   "scripts": {
     "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
     "backend": "cd backend && npm run dev",
-    "frontend": "cd \"DBMS project\" && npm run dev",
-    "start": "node backend/server.js",
-    "install-all": "npm install && cd backend && npm install && cd \"../DBMS project\" && npm install"
+    "frontend": "cd frontend && npm run dev",
+    "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "luxe-seed": "cd backend && node database/seed-luxe.js"
   },
   "dependencies": {
     "concurrently": "^8.2.2"
