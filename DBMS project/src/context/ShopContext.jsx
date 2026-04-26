@@ -55,7 +55,8 @@ export const ShopProvider = ({ children }) => {
     localStorage.setItem('orders', JSON.stringify(orders));
   }, [orders]);
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  const API_URL = import.meta.env.VITE_API_URL || 
+                  (window.location.hostname === 'localhost' ? 'http://localhost:5000' : window.location.origin);
 
   // Fetch products from backend
   const fetchProducts = async () => {

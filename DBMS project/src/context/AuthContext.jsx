@@ -29,7 +29,8 @@ export const AuthProvider = ({ children }) => {
     }
   }, [user]);
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  const API_URL = import.meta.env.VITE_API_URL || 
+                  (window.location.hostname === 'localhost' ? 'http://localhost:5000' : window.location.origin);
 
   const login = async (email, password) => {
     setAuthError(null);
