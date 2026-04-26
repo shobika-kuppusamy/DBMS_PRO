@@ -56,7 +56,7 @@ export const ShopProvider = ({ children }) => {
   }, [orders]);
 
   const API_URL = import.meta.env.VITE_API_URL || 
-                  (window.location.hostname === 'localhost' ? 'http://localhost:5000' : window.location.origin);
+                  (window.location.hostname === 'localhost' ? 'http://localhost:5000' : '');
 
   // Fetch products from backend
   const fetchProducts = async () => {
