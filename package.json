@@ -1,0 +1,14 @@
+{
+  "name": "aura-luxe-fullstack",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "cd backend && npm run dev",
+    "frontend": "cd \"DBMS project\" && npm run dev",
+    "start": "node backend/server.js",
+    "install-all": "npm install && cd backend && npm install && cd \"../DBMS project\" && npm install"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
