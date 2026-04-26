@@ -13,12 +13,9 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
         const newUser = await db.query(
             'INSERT INTO users (name, email, password, phone, address, role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING user_id, name, email, role',
-            [name, email, hashedPassword, phone, address, 'user']
+            [name, email, password, phone, address, 'user']
         );
 
         // Create a cart for the new user
@@ -39,7 +36,7 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
-        const validPass = await bcrypt.compare(password, user.rows[0].password);
+        const validPass = (password === user.rows[0].password);
         if (!validPass) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
