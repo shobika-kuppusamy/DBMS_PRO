@@ -19,24 +19,39 @@ export const ShopProvider = ({ children }) => {
 
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Load user-specific cart when user changes
+  const fetchCart = async () => {
+    if (!user) return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const response = await fetch(`${API_URL}/api/cart`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const mappedCart = data.map(item => ({
+          id: item.product_id,
+          name: item.name,
+          price: parseFloat(item.price),
+          image: item.image_url,
+          quantity: item.quantity,
+          cart_item_id: item.cart_item_id
+        }));
+        setCart(mappedCart);
+      }
+    } catch (err) {
+      console.error('Error fetching cart:', err);
+    }
+  };
+
   useEffect(() => {
     if (user) {
-      const userCartKey = `aura_cart_${user.email}`;
-      const saved = localStorage.getItem(userCartKey);
-      setCart(saved ? JSON.parse(saved) : []);
+      fetchCart();
     } else {
-      setCart([]); // Clear cart on logout
+      setCart([]);
     }
   }, [user]);
-
-  // Save user-specific cart whenever it changes
-  useEffect(() => {
-    if (user) {
-      const userCartKey = `aura_cart_${user.email}`;
-      localStorage.setItem(userCartKey, JSON.stringify(cart));
-    }
-  }, [cart, user]);
 
   useEffect(() => {
 
@@ -142,28 +157,82 @@ export const ShopProvider = ({ children }) => {
     }
   };
 
-  const addToCart = (product) => {
-    setCart(prev => {
-      const existing = prev.find(item => item.id === product.id);
-      if (existing) {
-        return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);
+  const addToCart = async (product) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        await fetch(`${API_URL}/api/cart/add`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ product_id: product.id, quantity: 1 })
+        });
+        fetchCart(); // Refresh from backend to get cart_item_id
+      } catch (err) {
+        console.error('Error adding to backend cart:', err);
       }
-      return [...prev, { ...product, quantity: 1 }];
-    });
+    } else {
+      setCart(prev => {
+        const existing = prev.find(item => item.id === product.id);
+        if (existing) {
+          return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);
+        }
+        return [...prev, { ...product, quantity: 1 }];
+      });
+    }
   };
 
-  const removeFromCart = (productId) => {
-    setCart(prev => prev.filter(item => item.id !== productId));
+  const removeFromCart = async (productId) => {
+    const itemToRemove = cart.find(item => item.id === productId);
+    if (!itemToRemove) return;
+
+    const token = localStorage.getItem('token');
+    if (token && itemToRemove.cart_item_id) {
+      try {
+        await fetch(`${API_URL}/api/cart/${itemToRemove.cart_item_id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        fetchCart(); // Refresh from backend
+      } catch (err) {
+        console.error('Error removing from backend cart:', err);
+      }
+    } else {
+      setCart(prev => prev.filter(item => item.id !== productId));
+    }
   };
 
-  const updateQuantity = (productId, amount) => {
-    setCart(prev => prev.map(item => {
-      if (item.id === productId) {
-        const newQuantity = Math.max(1, item.quantity + amount);
-        return { ...item, quantity: newQuantity };
+  const updateQuantity = async (productId, amount) => {
+    // Only allow update if quantity will be >= 1
+    const item = cart.find(i => i.id === productId);
+    if (item && item.quantity + amount < 1) return;
+
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        await fetch(`${API_URL}/api/cart/add`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ product_id: productId, quantity: amount })
+        });
+        fetchCart(); // Refresh from backend
+      } catch (err) {
+        console.error('Error updating backend cart:', err);
       }
-      return item;
-    }));
+    } else {
+      setCart(prev => prev.map(item => {
+        if (item.id === productId) {
+          const newQuantity = Math.max(1, item.quantity + amount);
+          return { ...item, quantity: newQuantity };
+        }
+        return item;
+      }));
+    }
   };
 
   const placeOrder = (paymentMethod = 'Online') => {
